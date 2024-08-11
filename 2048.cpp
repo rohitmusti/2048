@@ -52,47 +52,69 @@ class Game {
         mvprintw(y, 0, line.c_str());
       }
 
-
       string lineNumberOfMoves = "Number of moves: " + to_string(cycles);
       mvprintw(5, 0, lineNumberOfMoves.c_str());
     };
 
-    void moveLeftWithinRow(int currentRow, int currentColumn) {
-      if (currentColumn <= 0) {
-        return;
+    void bubbleZerosLeftToRight(int currentRow) {
+      // when a zero is encountered, send it to the end of the array
+      // and shift the rest of the array left
+
+      for (int i = 0; i < 4; i++) {
+        int currentSquare = this -> board[currentRow][i];
+
+        // non-zero values can remain in place
+        if (currentSquare != 0) {
+          continue;
+        }
+
+        // if we are a the end of the array, there is nowhere to move the zero
+        if (i == 3) {
+          continue;
+        }
+
+        // shift all values to the right, left
+        for (int j = i; j < 3; j++) {
+          this -> board[currentRow][j] = this -> board[currentRow][j + 1] ;
+        }
+
+        // set this square to the final square in the array
+        this -> board[currentRow][3] = currentSquare;
+        
       }
-
-      int nextColumn = currentColumn - 1;
-
-      int currentSquare = this->board[currentRow][currentColumn];
-      int nextSquare = this->board[currentRow][nextColumn];
-
-      if (currentSquare == 0) {
-        return moveLeftWithinRow(currentRow, nextColumn);
-      }
-
-      // assign the current square to the next square if the next square is a zero
-      if (nextSquare == 0) {
-        this -> board[currentRow][nextColumn] = currentSquare;
-        this -> board[currentRow][currentColumn] = 0;
-        return moveLeftWithinRow(currentRow, nextColumn);
-      }
-
-      // combine the current square with the next square if they match
-      else if (nextSquare == currentSquare) {
-        this -> board[currentRow][nextColumn] = currentSquare + nextSquare;
-        this -> board[currentRow][currentColumn] = 0;
-        nextColumn = nextColumn - 1;
-      }
-
-      return moveLeftWithinRow(currentRow, nextColumn);
-
     }
+
+    void mergeRowLeftToRight(int currentRow) {
+      // when a zero is encountered, send it to the end of the array
+      // and shift the rest of the array left
+
+      for (int i = 0; i < 3; i++) {
+        int currentSquare = this -> board[currentRow][i];
+        int nextSquare = this -> board[currentRow][i + 1];
+
+        if (currentSquare == nextSquare) {
+          this -> board[currentRow][i] = currentSquare + nextSquare;
+          this -> board[currentRow][i + 1] = 0;
+        }
+      }
+    }
+
 
     void moveLeft() {
       
+      // move everything as far left as possible
       for (int currentRow = 0; currentRow < 4; currentRow ++) {
-        this -> moveLeftWithinRow(currentRow, 3);
+        this -> bubbleZerosLeftToRight(currentRow);
+      }
+
+      // merge cells together
+      for (int currentRow = 0; currentRow < 4; currentRow ++) {
+        this -> mergeRowLeftToRight(currentRow);
+      }
+
+      // move everything as far left as possible
+      for (int currentRow = 0; currentRow < 4; currentRow ++) {
+        this -> bubbleZerosLeftToRight(currentRow);
       }
 
     };
